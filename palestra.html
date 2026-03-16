@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymPro Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-width: 70px;
+            --sidebar-expanded: 240px;
+            --primary: #2ecc71;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #1e293b;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            position: relative;
+            z-index: 100;
+            border-right: 1px solid #334155;
+        }
+
+        .sidebar:hover {
+            width: var(--sidebar-expanded);
+        }
+
+        .logo {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding-left: 22px;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .logo span {
+            display: none;
+            margin-left: 15px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .sidebar:hover .logo span { display: block; }
+
+        .nav-links {
+            flex-grow: 1;
+            padding-top: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            height: 50px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: 0.2s;
+            cursor: pointer;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .nav-item i {
+            min-width: var(--sidebar-width);
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--primary);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .sidebar:hover .nav-item span { display: block; }
+        .nav-item span { display: none; font-weight: 500; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+        }
+
+        .header-top {
+            margin-bottom: 30px;
+        }
+
+        .dashboard-grid {
+            display: none; /* Hidden by default, shown when Home is active */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .workout-view { display: none; animation: fadeIn 0.4s ease; }
+
+        /* --- EXERCISE TABLE --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; padding-bottom: 15px; }
+        td { padding: 18px 0; border-bottom: 1px solid #334155; }
+
+        .weight-input {
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: var(--primary);
+            padding: 8px;
+            border-radius: 6px;
+            width: 70px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-check {
+            color: #475569;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: 0.2s;
+        }
+        .btn-check.done { color: var(--primary); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; bottom: 0; width: 100%; height: 60px; flex-direction: row; }
+            .sidebar:hover { width: 100%; }
+            .logo { display: none; }
+            .nav-links { display: flex; width: 100%; justify-content: space-around; padding: 0; }
+            .main-content { padding: 20px; padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">
+            <i class="fas fa-dumbbell"></i>
+            <span>GYMPRO</span>
+        </div>
+        <div class="nav-links">
+            <div class="nav-item active" onclick="showView('home')">
+                <i class="fas fa-home"></i><span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="loadDay('Lun')">
+                <i class="fas fa-calendar-day"></i><span>Lunedì</span>
+            </div>
+            <div class="nav-item" onclick="loadDay('Mar')">
+                <i class="fas fa-calendar-day"></i><span>Martedì</span>
+            </div>
+            <div class="nav-item" onclick="loadDay('Mer')">
+                <i class="fas fa-calendar-day"></i><span>Mercoledì</span>
+            </div>
+            <div class="nav-item" onclick="loadDay('Gio')">
+                <i class="fas fa-calendar-day"></i><span>Giovedì</span>
+            </div>
+            <div class="nav-item" onclick="loadDay('Ven')">
+                <i class="fas fa-calendar-day"></i><span>Venerdì</span>
+            </div>
+            <div class="nav-item" onclick="loadDay('Sab')">
+                <i class="fas fa-calendar-day"></i><span>Sabato</span>
+            </div>
+            <div class="nav-item" onclick="loadDay('Dom')">
+                <i class="fas fa-calendar-day"></i><span>Domenica</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div id="home-view">
+            <div class="header-top">
+                <h1>Bentornato, <span style="color:var(--primary)">Atleta</span></h1>
+                <p style="color:#94a3b8">Ecco il riepilogo della tua scheda Massa 7/7.</p>
+            </div>
+            <div class="dashboard-grid" style="display: grid;">
+                <div class="card">
+                    <h3>Prossimo Allenamento</h3>
+                    <p id="next-workout-name">Caricamento...</p>
+                    <button onclick="loadCurrentDay()" style="background:var(--primary); border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">INIZIA ORA</button>
+                </div>
+                <div class="card">
+                    <h3>Focus Settimanale</h3>
+                    <p>Massa Ipertrofica - RIR 1-2</p>
+                    <small style="color: #e67e22"><i class="fas fa-exclamation-triangle"></i> Protezione polso attiva (Prese neutre)</small>
+                </div>
+            </div>
+        </div>
+
+        <div id="workout-view" class="workout-view">
+            <div class="header-top">
+                <button onclick="showView('home')" style="background:transparent; border:none; color:var(--primary); cursor:pointer; margin-bottom:10px;"><i class="fas fa-arrow-left"></i> Torna alla Home</button>
+                <h1 id="day-title">Giorno</h1>
+                <p id="day-subtitle" style="color:#94a3b8"></p>
+            </div>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Esercizio</th>
+                            <th>Serie/Rip</th>
+                            <th>Carico (kg)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="exercise-list">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+<script>
+    const workoutData = {
+        'Lun': { t: 'PUSH A', s: 'Focus Petto e Tricipiti', e: [{n:'Chest Press (Neutra)', r:'4x6-8'}, {n:'Distensioni incl.', r:'3x8-10'}, {n:'Croci ai cavi', r:'3x10-12'}, {n:'Alzate laterali', r:'4x12-15'}, {n:'Push down', r:'3x10-12'}] },
+        'Mar': { t: 'PULL A', s: 'Focus Dorso e Bicipiti', e: [{n:'Lat Machine (Neutro)', r:'4x6-8'}, {n:'Rematore Manubrio', r:'4x8-10'}, {n:'Pulley Basso', r:'3x10'}, {n:'Face Pull', r:'3x12-15'}, {n:'Curl Hammer', r:'3x8-10'}] },
+        'Mer': { t: 'LEGS A', s: 'Gambe e Addome', e: [{n:'Squat / Hack Squat', r:'4x6-8'}, {n:'Pressa 45°', r:'3x10'}, {n:'Affondi Manubri', r:'3x10/l'}, {n:'Leg Extension', r:'3x12-15'}, {n:'Leg Raise', r:'3x15'}] },
+        'Gio': { t: 'PUSH B', s: 'Spalle e Richiamo Petto', e: [{n:'Shoulder Press', r:'4x6-8'}, {n:'Alzate laterali cavi', r:'4x12-15'}, {n:'Alzate posteriori', r:'3x12-15'}, {n:'Chest press light', r:'3x10-12'}, {n:'French Press corda', r:'3x10-12'}] },
+        'Ven': { t: 'PULL B', s: 'Dorso e Addome', e: [{n:'Rematore Macchina', r:'4x6-8'}, {n:'Lat Machine Larga', r:'3x8-10'}, {n:'Pullover Cavo', r:'3x12'}, {n:'Curl Panca Incl.', r:'3x10'}, {n:'Reverse Crunch', r:'3x15'}] },
+        'Sab': { t: 'LEGS B', s: 'Catena Posteriore e Addome', e: [{n:'Stacco Rumeno', r:'4x6-8'}, {n:'Hip Thrust', r:'3x8-10'}, {n:'Leg Curl', r:'3x10-12'}, {n:'Calf Seduto', r:'4x15-20'}, {n:'Crunch Pesante', r:'4x8-12'}] },
+        'Dom': { t: 'FULL BODY', s: 'Richiamo Soft e Mobilità', e: [{n:'Pectoral Machine', r:'3x12-15'}, {n:'Pulley Alto', r:'3x10-12'}, {n:'Leg Press', r:'3x12-15'}, {n:'Curl Martello', r:'3x12'}, {n:'Mobilità Dinamica', r:'10 min'}] }
+    };
+
+    function showView(view) {
+        document.getElementById('home-view').style.display = (view === 'home' ? 'block' : 'none');
+        document.getElementById('workout-view').style.display = (view === 'workout' ? 'block' : 'none');
+        if(view === 'home') {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector('.nav-item').classList.add('active');
+        }
+    }
+
+    function loadDay(day) {
+        const data = workoutData[day];
+        document.getElementById('day-title').innerText = data.t;
+        document.getElementById('day-subtitle').innerText = data.s;
+        
+        const list = document.getElementById('exercise-list');
+        list.innerHTML = '';
+        
+        data.e.forEach((ex, i) => {
+            const key = `pro-${day}-${i}`;
+            const val = localStorage.getItem(key) || '';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><b>${ex.n}</b></td>
+                <td>${ex.r}</td>
+                <td><input type="number" class="weight-input" value="${val}" oninput="localStorage.setItem('${key}', this.value)"></td>
+                <td style="text-align:right"><i class="fas fa-check-circle btn-check" onclick="this.classList.toggle('done')"></i></td>
+            `;
+            list.appendChild(row);
+        });
+        
+        showView('workout');
+        // Highlight sidebar
+        document.querySelectorAll('.nav-item').forEach(item => {
+            if(item.innerText.includes(day)) item.classList.add('active');
+            else item.classList.remove('active');
+        });
+    }
+
+    function loadCurrentDay() {
+        const days = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+        loadDay(days[new Date().getDay()]);
+    }
+
+    // Set next workout name on home
+    const daysFull = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    document.getElementById('next-workout-name').innerText = "Oggi è " + daysFull[new Date().getDay()];
+
+</script>
+</body>
+</html>
